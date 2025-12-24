@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音效调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-btn {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #e55a87;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-panel">
+        <h1>🎵 音效系统调试</h1>
+        
+        <div class="status">
+            <strong>系统状态：</strong>
+            <span id="system-status">检测中...</span>
+        </div>
+        
+        <div>
+            <button class="test-btn" onclick="testInit()">初始化音效系统</button>
+            <button class="test-btn" onclick="testMatchSuccess()">测试匹配成功音效</button>
+            <button class="test-btn" onclick="testFallback()">测试备用音效</button>
+            <button class="test-btn" onclick="testFlip()">测试翻牌音效</button>
+            <button class="test-btn" onclick="testBackgroundMusic()">播放背景音乐</button>
+            <button class="test-btn" onclick="stopBackgroundMusic()">停止背景音乐</button>
+            <button class="test-btn" onclick="showStatus()">显示状态</button>
+            <button class="test-btn" onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <div id="log" class="log">
+            <div>音效调试器已启动...</div>
+        </div>
+    </div>
+
+    <script src="js/audio-config.js"></script>
+    <script src="js/audio.js"></script>
+    
+    <script>
+        const logElement = document.getElementById('log');
+        const statusElement = document.getElementById('system-status');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : type === 'success' ? 'green' : 'black';
+            div.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(div);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            logElement.innerHTML = '<div>日志已清空</div>';
+        }
+        
+        // 重写控制台输出
+        const originalConsole = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error
+        };
+        
+        console.log = function(...args) {
+            originalConsole.log.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+        
+        console.warn = function(...args) {
+            originalConsole.warn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalConsole.error.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        function testInit() {
+            addLog('=== 初始化音效系统 ===', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.init();
+                updateStatus();
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function testMatchSuccess() {
+            addLog('=== 测试匹配成功音效 ===', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playMatchSuccess();
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function testFallback() {
+            addLog('=== 强制测试备用音效 ===', 'info');
+            // 这里需要直接调用备用音效
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                // 由于备用音效是内部函数，我们通过设置错误状态来触发
+                addLog('尝试触发备用音效...', 'info');
+                AudioManager.playMatchSuccess(); // 如果主音效失败，会自动调用备用
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function testFlip() {
+            addLog('=== 测试翻牌音效 ===', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playFlip();
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function testBackgroundMusic() {
+            addLog('=== 测试背景音乐 ===', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playBackgroundMusic();
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function stopBackgroundMusic() {
+            addLog('=== 停止背景音乐 ===', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.stopBackgroundMusic();
+            } else {
+                addLog('AudioManager 未定义！', 'error');
+            }
+        }
+        
+        function showStatus() {
+            addLog('=== 系统状态检查 ===', 'info');
+            
+            // 检查 AudioManager
+            if (typeof AudioManager !== 'undefined') {
+                addLog('✅ AudioManager 已加载', 'success');
+                
+                if (AudioManager.getAudioLoadState) {
+                    const state = AudioManager.getAudioLoadState();
+                    addLog(`音效加载状态: ${state.state}`, 'info');
+                    addLog(`当前音源: ${state.currentSource + 1}/${state.totalSources}`, 'info');
+                    addLog(`音源URL: ${state.currentUrl}`, 'info');
+                }
+                
+                if (AudioManager.getMusicState) {
+                    const musicState = AudioManager.getMusicState();
+                    addLog(`背景音乐加载状态: ${musicState.loadState}`, 'info');
+                    addLog(`背景音乐播放状态: ${musicState.isPlaying ? '播放中' : '已停止'}`, 'info');
+                    addLog(`音乐音源: ${musicState.currentSource + 1}/${musicState.totalSources}`, 'info');
+                    addLog(`音乐URL: ${musicState.currentUrl}`, 'info');
+                    addLog(`音乐音量: ${Math.round(musicState.volume * 100)}%`, 'info');
+                }
+                
+                if (AudioManager.getMuteState) {
+                    const isMuted = AudioManager.getMuteState();
+                    addLog(`静音状态: ${isMuted ? '已静音' : '未静音'}`, 'info');
+                }
+            } else {
+                addLog('❌ AudioManager 未定义', 'error');
+            }
+            
+            // 检查 Web Audio API
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    addLog('✅ Web Audio API 支持', 'success');
+                } else {
+                    addLog('❌ Web Audio API 不支持', 'error');
+                }
+            } catch (e) {
+                addLog('❌ Web Audio API 检测失败: ' + e.message, 'error');
+            }
+            
+            // 检查配置
+            if (typeof AudioConfig !== 'undefined') {
+                addLog('✅ AudioConfig 已加载', 'success');
+                addLog(`配置的音效源数量: ${AudioConfig.matchSuccess.sources.length}`, 'info');
+                if (AudioConfig.backgroundMusic) {
+                    addLog(`配置的音乐源数量: ${AudioConfig.backgroundMusic.sources.length}`, 'info');
+                }
+            } else {
+                addLog('❌ AudioConfig 未定义', 'error');
+            }
+        }
+        
+        function updateStatus() {
+            if (typeof AudioManager !== 'undefined') {
+                statusElement.textContent = '音效系统已加载';
+                statusElement.style.color = 'green';
+            } else {
+                statusElement.textContent = '音效系统未加载';
+                statusElement.style.color = 'red';
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('页面加载完成', 'success');
+            updateStatus();
+            showStatus();
+        });
+        
+        // 自动初始化
+        setTimeout(() => {
+            testInit();
+        }, 1000);
+    </script>
+</body>
+</html>

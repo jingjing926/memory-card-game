@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音效系统测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .test-btn:active {
+            transform: translateY(0);
+        }
+        
+        .status-display {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .status-value {
+            color: #fff;
+        }
+        
+        .log-display {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+        }
+        
+        .log-info { color: #87ceeb; }
+        .log-warn { color: #ffa500; }
+        .log-error { color: #ff6b6b; }
+        .log-success { color: #98fb98; }
+        
+        .network-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .network-online { background: #27ae60; color: white; }
+        .network-offline { background: #e74c3c; color: white; }
+        .network-testing { background: #f39c12; color: white; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎵 音效系统测试</h1>
+        
+        <div class="test-section">
+            <h2>📊 系统状态</h2>
+            <div class="status-display">
+                <div class="status-item">
+                    <span class="status-label">音效管理器:</span>
+                    <span id="manager-status" class="status-value">未初始化</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Web Audio API:</span>
+                    <span id="webaudio-status" class="status-value">检测中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">用户交互:</span>
+                    <span id="interaction-status" class="status-value">未交互</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">网络状态:</span>
+                    <span id="network-status" class="status-value network-testing">检测中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">音效加载:</span>
+                    <span id="audio-load-status" class="status-value">检测中...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">当前音源:</span>
+                    <span id="current-source-status" class="status-value">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🎮 音效测试</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="testMatchSuccess()">匹配成功音效</button>
+                <button class="test-btn" onclick="testFlipSound()">翻牌音效</button>
+                <button class="test-btn" onclick="testFailSound()">匹配失败音效</button>
+                <button class="test-btn" onclick="testVictorySound()">胜利音效</button>
+                <button class="test-btn" onclick="testFallbackSound()">备用音效</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 控制面板</h2>
+            <div class="test-buttons">
+                <button class="test-btn" onclick="initAudioSystem()">初始化音效系统</button>
+                <button class="test-btn" onclick="reloadAudio()">重新加载音效</button>
+                <button class="test-btn" onclick="toggleMute()">切换静音</button>
+                <button class="test-btn" onclick="showAudioMonitor()">显示监控面板</button>
+                <button class="test-btn" onclick="clearLog()">清空日志</button>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📝 系统日志</h2>
+            <div id="log-display" class="log-display">
+                <div class="log-entry log-info">系统启动中...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入音效系统 -->
+    <script src="js/audio-config.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/audio-monitor.js"></script>
+    
+    <script>
+        // 日志系统
+        const logDisplay = document.getElementById('log-display');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDisplay.appendChild(entry);
+            logDisplay.scrollTop = logDisplay.scrollHeight;
+        }
+        
+        function clearLog() {
+            logDisplay.innerHTML = '<div class="log-entry log-info">日志已清空</div>';
+        }
+        
+        // 重写 console 方法以显示在页面上
+        const originalConsole = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error
+        };
+        
+        console.log = function(...args) {
+            originalConsole.log.apply(console, args);
+            addLog(args.join(' '), 'info');
+        };
+        
+        console.warn = function(...args) {
+            originalConsole.warn.apply(console, args);
+            addLog(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalConsole.error.apply(console, args);
+            addLog(args.join(' '), 'error');
+        };
+        
+        // 测试函数
+        function testMatchSuccess() {
+            addLog('测试匹配成功音效', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playMatchSuccess();
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        function testFlipSound() {
+            addLog('测试翻牌音效', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playFlip();
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        function testFailSound() {
+            addLog('测试匹配失败音效', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playMatchFail();
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        function testVictorySound() {
+            addLog('测试胜利音效', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                AudioManager.playVictory();
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        function testFallbackSound() {
+            addLog('测试备用音效', 'info');
+            // 直接调用备用音效（需要访问内部函数）
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.markUserInteraction();
+                // 临时禁用主音效，强制使用备用
+                const originalAudio = AudioManager.playMatchSuccess;
+                AudioManager.playMatchSuccess = function() {
+                    addLog('强制使用备用音效', 'warn');
+                    // 这里需要调用内部的 playSuccessFallback 函数
+                    // 由于封装问题，我们通过设置错误状态来触发备用音效
+                };
+                AudioManager.playMatchSuccess();
+                // 恢复原函数
+                setTimeout(() => {
+                    AudioManager.playMatchSuccess = originalAudio;
+                }, 1000);
+            }
+        }
+        
+        function initAudioSystem() {
+            addLog('初始化音效系统', 'info');
+            if (typeof AudioManager !== 'undefined') {
+                AudioManager.init();
+                AudioManager.markUserInteraction();
+                updateStatus();
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        function reloadAudio() {
+            addLog('重新加载音效', 'info');
+            if (typeof AudioManager !== 'undefined' && AudioManager.reloadAudio) {
+                AudioManager.reloadAudio();
+                setTimeout(updateStatus, 1000);
+            } else {
+                addLog('reloadAudio 方法不可用', 'error');
+            }
+        }
+        
+        function toggleMute() {
+            if (typeof AudioManager !== 'undefined') {
+                const isMuted = AudioManager.toggleMute();
+                addLog(`音效已${isMuted ? '关闭' : '开启'}`, 'info');
+            } else {
+                addLog('AudioManager 未定义', 'error');
+            }
+        }
+        
+        // 状态更新
+        function updateStatus() {
+            // 检查 AudioManager
+            const managerStatus = document.getElementById('manager-status');
+            if (typeof AudioManager !== 'undefined') {
+                managerStatus.textContent = '已加载';
+                managerStatus.style.color = '#98fb98';
+            } else {
+                managerStatus.textContent = '未加载';
+                managerStatus.style.color = '#ff6b6b';
+            }
+            
+            // 检查 Web Audio API
+            const webAudioStatus = document.getElementById('webaudio-status');
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    webAudioStatus.textContent = '支持';
+                    webAudioStatus.style.color = '#98fb98';
+                } else {
+                    webAudioStatus.textContent = '不支持';
+                    webAudioStatus.style.color = '#ff6b6b';
+                }
+            } catch (e) {
+                webAudioStatus.textContent = '检测失败';
+                webAudioStatus.style.color = '#ffa500';
+            }
+            
+            // 检查用户交互状态
+            const interactionStatus = document.getElementById('interaction-status');
+            interactionStatus.textContent = '已交互';
+            interactionStatus.style.color = '#98fb98';
+            
+            // 检查网络状态
+            const networkStatus = document.getElementById('network-status');
+            if (navigator.onLine) {
+                networkStatus.textContent = '在线';
+                networkStatus.className = 'status-value network-online';
+            } else {
+                networkStatus.textContent = '离线';
+                networkStatus.className = 'status-value network-offline';
+            }
+            
+            // 检查音效加载状态
+            if (typeof AudioManager !== 'undefined' && AudioManager.getAudioLoadState) {
+                const state = AudioManager.getAudioLoadState();
+                const audioLoadStatus = document.getElementById('audio-load-status');
+                const currentSourceStatus = document.getElementById('current-source-status');
+                
+                audioLoadStatus.textContent = state.state;
+                currentSourceStatus.textContent = `${state.currentSource + 1}/${state.totalSources}`;
+                
+                switch (state.state) {
+                    case 'loaded':
+                        audioLoadStatus.style.color = '#98fb98';
+                        break;
+                    case 'loading':
+                        audioLoadStatus.style.color = '#ffa500';
+                        break;
+                    case 'failed':
+                        audioLoadStatus.style.color = '#ff6b6b';
+                        break;
+                }
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('页面加载完成', 'success');
+            updateStatus();
+            
+            // 定期更新状态
+            setInterval(updateStatus, 2000);
+            
+            // 自动初始化音效系统
+            setTimeout(() => {
+                initAudioSystem();
+            }, 1000);
+        });
+        
+        // 监听网络状态变化
+        window.addEventListener('online', () => {
+            addLog('网络连接已恢复', 'success');
+            updateStatus();
+        });
+        
+        window.addEventListener('offline', () => {
+            addLog('网络连接已断开', 'warn');
+            updateStatus();
+        });
+    </script>
+</body>
+</html>

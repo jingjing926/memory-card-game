@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="记忆力大考验">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>记忆力大考验 - 纸巾萝卜猫</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 开始页面 -->
+    <div id="start-screen" class="screen active">
+        <!-- 简化的装饰元素 - 仅保留吉祥物漂浮 -->
+        <div class="floating-elements">
+            <img src="assets/images/mascot.png" alt="" class="float-mascot">
+        </div>
+        
+        <div class="start-content">
+            <!-- 主题标题 -->
+            <div class="title-section">
+                <img src="assets/images/title.png" alt="记忆力大考验 纸巾萝卜猫" class="game-title">
+            </div>
+
+            <!-- 游戏规则说明模块 -->
+            <div class="rules-section">
+                <h2 class="rules-title">🎮 游戏规则</h2>
+                <div class="rules-content">
+                    <div class="rule-item">
+                        <span class="rule-number">1</span>
+                        <div class="rule-text">
+                            <h3>翻牌配对</h3>
+                            <p>点击卡牌翻开，寻找相同的道具进行配对</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-number">2</span>
+                        <div class="rule-text">
+                            <h3>记忆挑战</h3>
+                            <p>每次只能翻开2张卡牌，记住位置是关键</p>
+                        </div>
+                    </div>
+                    <div class="rule-item">
+                        <span class="rule-number">3</span>
+                        <div class="rule-text">
+                            <h3>完成目标</h3>
+                            <p>配对完成所有10组道具即可通关胜利</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 道具预览 -->
+                <div class="items-preview">
+                    <h3 class="preview-title">🎯 道具一览</h3>
+                    <div class="items-grid">
+                        <div class="preview-item">
+                            <img src="assets/images/hat.png" alt="帽子">
+                            <span>帽子</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/catfood.png" alt="猫粮">
+                            <span>猫粮</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/cola.png" alt="可乐">
+                            <span>可乐</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/carrot.png" alt="萝卜">
+                            <span>萝卜</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/headphone.png" alt="耳机">
+                            <span>耳机</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/tissue.png" alt="纸巾">
+                            <span>纸巾</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/umbrella.png" alt="雨伞">
+                            <span>雨伞</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/mouse.png" alt="鼠标">
+                            <span>鼠标</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/watch.png" alt="手表">
+                            <span>手表</span>
+                        </div>
+                        <div class="preview-item">
+                            <img src="assets/images/mickey.png" alt="米老鼠">
+                            <span>米老鼠</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 开始按钮 -->
+            <div class="start-section">
+                <button id="start-btn" class="btn-start">🚀 开始挑战</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏页面 -->
+    <div id="game-screen" class="screen">
+        <header class="game-header">
+            <div class="header-left">
+                <img src="assets/images/mascot.png" alt="" class="header-mascot">
+                <div class="header-info">
+                    <h1 class="header-title">记忆力大考验</h1>
+                    <div class="level-info">
+                        <span class="level-badge">关卡 <span id="current-level">1</span></span>
+                        <span class="level-name" id="level-name">初级挑战</span>
+                    </div>
+                </div>
+            </div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-label">翻牌次数</span>
+                    <span id="attempts" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">已配对</span>
+                    <span id="matched" class="stat-value">0</span>
+                    <span class="stat-total">/<span id="total-pairs">8</span></span>
+                </div>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <div id="card-grid" class="card-grid">
+                <!-- 卡牌将通过 JavaScript 动态生成 -->
+            </div>
+        </main>
+
+        <footer class="game-footer">
+            <button id="restart-btn" class="btn-control">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+                重新开始
+            </button>
+            <button id="sound-btn" class="btn-control">
+                <svg id="sound-on-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                </svg>
+                <svg id="sound-off-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                    <line x1="23" y1="9" x2="17" y2="15"/>
+                    <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+                <span id="sound-text">音效开</span>
+            </button>
+
+            <button id="home-btn" class="btn-control">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+                返回首页
+            </button>
+        </footer>
+    </div>
+
+    <!-- 胜利弹窗 -->
+    <div id="victory-modal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="victory-stars">
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+                <span class="star">⭐</span>
+            </div>
+            <h2 class="victory-title">恭喜通关！</h2>
+            <img src="assets/images/mascot.png" alt="" class="victory-mascot">
+            <div class="victory-stats">
+                <p>总翻牌次数：<span id="final-attempts" class="highlight">0</span> 次</p>
+            </div>
+            <div class="victory-buttons">
+                <button id="play-again-btn" class="btn-primary">下一关</button>
+                <button id="back-home-btn" class="btn-secondary">返回首页</button>
+                <button id="restart-level-btn" class="btn-secondary">重玩本关</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/audio-config.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/audio-monitor.js"></script>
+    <script src="js/level.js"></script>
+    <script src="js/card.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
